@@ -35,7 +35,7 @@ inline const std::string incerr_msg_dispatch(E &&e) {
 }
 } // namespace detail
 
-class incerr_code : std::error_code {
+class incerr_code : public std::error_code {
 
 private:
     const std::string localMsg;
