@@ -36,6 +36,13 @@ inline const std::string incerr_msg_dispatch(E &&e) {
 } // namespace detail
 
 class incerr_code : public std::error_code {
+    template <typename E>
+    requires std::is_scoped_enum_v<E>
+    friend inline const incerr_code make_incerr_code(E e);
+
+    template <typename E>
+    requires std::is_scoped_enum_v<E>
+    friend inline const incerr_code make_incerr_code(E e, std::string_view sv);
 
 private:
     const std::string localMsg;
