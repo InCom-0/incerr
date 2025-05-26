@@ -15,8 +15,13 @@ concept enumIsRegistered = requires(T t) {
     { make_error_code(t) } -> std::same_as<std::error_code>;
     { make_error_condition(t) } -> std::same_as<std::error_condition>;
 };
+template <typename T>
+concept enumHasMsgDispatch = requires(T t) {
+    { incerr_msg_dispatch(t) } -> std::same_as<std::string_view>;
+};
 
 template <typename T>
+requires enumHasMsgDispatch<T>
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
