@@ -1,15 +1,14 @@
 #pragma once
 
+#include <string_view>
 #include <system_error>
 #include <utility>
 
 namespace incom {
 namespace error {
+namespace detail {
 template <typename T>
 class err_category_impl : public std::error_category {
-    // friend const std::error_code make_error_code<T>(T e);
-    // friend const std::error_code make_error_condition(Unexp_plotSpecs e);
-
 private:
     err_category_impl() = default;
 
@@ -17,12 +16,12 @@ private:
     virtual std::string message(int ev) const override { return (incerr_msg_dispatch(T{ev})); }
 
 public:
+    // Meyers' Singleton technique to guarantee only 1 instance is ever created
     static const std::error_category &getSingleton() {
         static const err_category_impl<T> instance;
         return instance;
     }
 };
-
 // IF THIS GETS INSTANTIATED ONE GETS A COMPILE TIME ERROR ON PURPOSE
 // DEFAULT ie. unhandled message dispatch for a particular enum
 template <typename E>
@@ -34,11 +33,41 @@ inline const std::string incerr_msg_dispatch(E &&e) {
                   "'E' is the scoped enum type in the same namespace as the scoped enum definition");
     std::unreachable();
 }
+} // namespace detail
+
+class incerr_code : std::error_code {
+
+private:
+    const std::string localMsg;
+
+private:
+    incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), localMsg() {}
+    incerr_code(int ec, const std::error_category &cat, std::string_view localMsg) noexcept
+        : std::error_code(ec, cat), localMsg(localMsg) {}
+};
 
 template <typename E>
 requires std::is_scoped_enum_v<E>
 inline const std::error_code make_error_code(E e) {
-    return std::error_code(std::to_underlying(e), error::err_category_impl<E>::getSingleton());
+    return std::error_code(std::to_underlying(e), error::detail::err_category_impl<E>::getSingleton());
+}
+template <typename E>
+requires std::is_scoped_enum_v<E>
+inline const std::error_code make_error_code(E e, std::string_view sv) {
+    return std::error_code(std::to_underlying(e), error::detail::err_category_impl<E>::getSingleton());
+}
+
+
+template <typename E>
+requires std::is_scoped_enum_v<E>
+inline const incerr_code make_incerr_code(E e) {
+    return incerr_code(std::to_underlying(e), error::detail::err_category_impl<E>::getSingleton());
+}
+
+template <typename E>
+requires std::is_scoped_enum_v<E>
+inline const incerr_code make_incerr_code(E e, std::string_view sv) {
+    return incerr_code(std::to_underlying(e), error::detail::err_category_impl<E>::getSingleton(), sv);
 }
 
 } // namespace error
