@@ -99,11 +99,11 @@ namespace incom::error {}
                                                                                                                        \
     namespace NAMESPACE_FULL {                                                                                         \
     std::error_code make_error_code(TYPE e) {                                                                          \
-        return std::error_code(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());          \
+        return std::error_code(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());           \
     }                                                                                                                  \
                                                                                                                        \
     std::error_condition make_error_condition(TYPE e) {                                                                \
-        return std::error_condition(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());     \
+        return std::error_condition(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());      \
     }                                                                                                                  \
     }
 
