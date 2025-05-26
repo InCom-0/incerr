@@ -39,10 +39,10 @@ public:
 // DEFAULT ie. unhandled message dispatch for a particular enum
 template <typename E>
 requires std::is_scoped_enum_v<E>
-inline const std::string incerr_msg_dispatch(E &&e) {
+inline std::string_view incerr_msg_dispatch(E &&e) {
     static_assert(false,
                   "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
-                  "provide a free function with the signature 'inline const std::string err_msg_dispatch(E &&e)' where "
+                  "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E &&e)' where "
                   "'E' is the scoped enum type in the same namespace as the scoped enum definition");
     std::unreachable();
 }
@@ -54,19 +54,19 @@ public:
 
     template <typename E>
     requires std::is_scoped_enum_v<E>
-    static inline const incerr_code make_incerr_code(E e) {
+    static inline const incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E>
     requires std::is_scoped_enum_v<E>
-    static inline const incerr_code make_incerr_code(E e, std::string_view sv) {
+    static inline const incerr_code make(E e, std::string_view const sv) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
     }
 
 private:
     incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), localMsg() {}
-    incerr_code(int ec, const std::error_category &cat, std::string_view localMsg) noexcept
+    incerr_code(int ec, const std::error_category &cat, std::string_view const localMsg) noexcept
         : std::error_code(ec, cat), localMsg(localMsg) {}
 };
 
