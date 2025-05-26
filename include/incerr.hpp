@@ -95,17 +95,16 @@ namespace incom::error {}
 // typically at the end of the file with the enums definitions). Or just do the thing the macro does manually
 #define INCERR_REGISTER(TYPE, NAMESPACE_FULL)                                                                          \
     template <>                                                                                                        \
-    struct std::is_error_code_enum<TYPE> : public true_type {                                                          \
-    }                                                                                                                  \
+    struct std::is_error_code_enum<TYPE> : public true_type {};                                                        \
                                                                                                                        \
     namespace NAMESPACE_FULL {                                                                                         \
-        std::error_code make_error_code(TYPE e) {                                                                      \
-            return std::error_code(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton());      \
-        }                                                                                                              \
+    std::error_code make_error_code(TYPE e) {                                                                          \
+        return std::error_code(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton());          \
+    }                                                                                                                  \
                                                                                                                        \
-        std::error_condition make_error_condition(TYPE e) {                                                            \
-            return std::error_condition(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton()); \
-        }                                                                                                              \
+    std::error_condition make_error_condition(TYPE e) {                                                                \
+        return std::error_condition(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton());     \
+    }                                                                                                                  \
     }
 
 namespace incerr = incom::error;
