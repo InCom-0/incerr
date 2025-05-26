@@ -16,13 +16,16 @@ private:
     incerr_cat() = default;
 
     template <typename TT>
-    constexpr auto __typeToString() {
+    constexpr auto __typeToString() const {
         auto EmbeddingSignature = std::string{std::source_location::current().function_name()};
         auto firstPos           = EmbeddingSignature.rfind("::") + 2;
         return EmbeddingSignature.substr(firstPos, EmbeddingSignature.size() - firstPos - 1);
     }
 
-    virtual const char *name() const noexcept override { return __typeToString<T>(); }
+    virtual const char *name() const noexcept override {
+        static const std::string s = __typeToString<T>();
+        return s.c_str();
+    }
     virtual std::string message(int ev) const override { return (incerr_msg_dispatch(T{ev})); }
 
 public:
