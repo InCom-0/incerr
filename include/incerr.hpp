@@ -55,19 +55,19 @@ public:
     const std::string localMsg;
 
     template <typename E>
-    requires std::is_scoped_enum_v<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value
     static inline const incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E, typename S>
-    requires std::is_scoped_enum_v<E> && std::is_convertible_v<S, std::string_view>
+    requires std::is_scoped_enum_v<E> && std::is_convertible_v<S, std::string_view> && std::is_error_code_enum<E>::value
     static inline const incerr_code make(E e, S const sv) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
     }
 
     template <typename E>
-    requires std::is_scoped_enum_v<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value
     static inline const std::error_code make_std_ec(E e) {
         return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
