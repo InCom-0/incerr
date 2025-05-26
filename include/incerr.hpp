@@ -17,14 +17,14 @@ private:
     incerr_cat() = default;
 
     template <typename TT>
-    constexpr auto __typeToString() const {
+    consteval auto __typeToString() const {
         auto EmbeddingSignature = std::string{std::source_location::current().function_name()};
         auto firstPos           = EmbeddingSignature.rfind("::") + 2;
         return EmbeddingSignature.substr(firstPos, EmbeddingSignature.size() - firstPos - 1);
     }
 
     virtual const char *name() const noexcept override {
-        static const std::string s = __typeToString<T>();
+        static constexpr const std::string s = __typeToString<T>();
         return s.c_str();
     }
     virtual std::string message(int ev) const override { return std::string(incerr_msg_dispatch(T{ev})); }
@@ -36,16 +36,15 @@ public:
         return instance;
     }
 };
+
 // IF THIS GETS INSTANTIATED ONE GETS A COMPILE TIME ERROR ON PURPOSE
-// DEFAULT ie. unhandled message dispatch for a particular enum
 template <typename E>
 requires std::is_scoped_enum_v<E>
 inline std::string_view incerr_msg_dispatch(E &&e) {
-    static_assert(
-        false,
-        "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
-        "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E &&e)' where "
-        "'E' is the scoped enum type in the same namespace as the scoped enum definition");
+    static_assert(false, "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
+                         "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E "
+                         "&&e)' in the same namespace as the scoped enum definition where "
+                         "'E' is the scoped enum type");
     std::unreachable();
 }
 } // namespace detail
@@ -73,26 +72,18 @@ public:
     }
 
 private:
+    incerr_code() = delete;
     incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), localMsg() {}
     incerr_code(int ec, const std::error_category &cat, std::string_view const localMsg) noexcept
         : std::error_code(ec, cat), localMsg(localMsg) {}
 };
-
-// template <typename E>
-// requires std::is_scoped_enum_v<E>
-// inline const std::error_code make_error_code(E e) {
-//     return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
-// }
-// template <typename E>
-// requires std::is_scoped_enum_v<E>
-// inline const std::error_code make_error_code(E e, std::string_view sv) {
-//     return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
-// }
-
-
 } // namespace error
 } // namespace incom
 
+// The user MUST 'register' the enum types used in the library. Constraints violation on incerr_code static methods will
+// ensue during compilation otherwise.
+// Either do this by using this macro (which can be 'undefed' once not needed ...
+// typically at the end of the file with the enums definitions). Or just do the thing the macro does manually
 #define INCERR_REGISTER(TYPE)                                                                                          \
     template <>                                                                                                        \
     struct std::is_error_code_enum<TYPE> : public true_type {}
