@@ -73,6 +73,12 @@ public:
 
 private:
     incerr_code() = delete;
+    template <typename E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value
+    incerr_code(E __e) {
+        *this = make(__e);
+    }
+
     incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), localMsg() {}
     incerr_code(int ec, const std::error_category &cat, std::string_view const localMsg) noexcept
         : std::error_code(ec, cat), localMsg(localMsg) {}
@@ -80,12 +86,26 @@ private:
 } // namespace error
 } // namespace incom
 
+
+namespace incom::error {}
+
 // The user MUST 'register' the enum types used in the library. Constraints violation on incerr_code static methods will
 // ensue during compilation otherwise.
 // Either do this by using this macro (which can be 'undefed' once not needed ...
 // typically at the end of the file with the enums definitions). Or just do the thing the macro does manually
-#define INCERR_REGISTER(TYPE)                                                                                          \
+#define INCERR_REGISTER(TYPE, NAMESPACE_FULL)                                                                          \
     template <>                                                                                                        \
-    struct std::is_error_code_enum<TYPE> : public true_type {}
+    struct std::is_error_code_enum<TYPE> : public true_type {                                                          \
+    }                                                                                                                  \
+                                                                                                                       \
+    namespace NAMESPACE_FULL {                                                                                         \
+        std::error_code make_error_code(TYPE e) {                                                                      \
+            return std::error_code(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton());      \
+        }                                                                                                              \
+                                                                                                                       \
+        std::error_condition make_error_condition(TYPE e) {                                                            \
+            return std::error_condition(static_cast<int>(e), incom::incerr::detail::incerr_cat<TYPE>::getSingleton()); \
+        }                                                                                                              \
+    }
 
 namespace incerr = incom::error;
