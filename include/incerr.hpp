@@ -26,7 +26,7 @@ private:
         static const std::string s = __typeToString<T>();
         return s.c_str();
     }
-    virtual std::string message(int ev) const override { return (incerr_msg_dispatch(T{ev})); }
+    virtual std::string message(int ev) const override { return std::string(incerr_msg_dispatch(T{ev})); }
 
 public:
     // Meyers' Singleton technique to guarantee only 1 instance is ever created
@@ -40,10 +40,11 @@ public:
 template <typename E>
 requires std::is_scoped_enum_v<E>
 inline std::string_view incerr_msg_dispatch(E &&e) {
-    static_assert(false,
-                  "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
-                  "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E &&e)' where "
-                  "'E' is the scoped enum type in the same namespace as the scoped enum definition");
+    static_assert(
+        false,
+        "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
+        "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E &&e)' where "
+        "'E' is the scoped enum type in the same namespace as the scoped enum definition");
     std::unreachable();
 }
 } // namespace detail
