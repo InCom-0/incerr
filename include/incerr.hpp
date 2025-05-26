@@ -51,13 +51,13 @@ public:
 
     template <typename E>
     requires std::is_scoped_enum_v<E>
-    inline const incerr_code make_incerr_code(E e) {
+    static inline const incerr_code make_incerr_code(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E>
     requires std::is_scoped_enum_v<E>
-    inline const incerr_code make_incerr_code(E e, std::string_view sv) {
+    static inline const incerr_code make_incerr_code(E e, std::string_view sv) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
     }
 
