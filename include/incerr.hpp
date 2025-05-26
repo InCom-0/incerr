@@ -17,7 +17,7 @@ concept enumIsRegistered = requires(T t) {
 };
 template <typename T>
 concept enumHasMsgDispatch = requires(T t) {
-    { incerr_msg_dispatch(t) } -> std::same_as<std::string_view>;
+    { incerr_msg_dispatch(std::move(t)) } -> std::same_as<std::string_view>;
 };
 
 template <typename T>
