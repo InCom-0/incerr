@@ -98,11 +98,11 @@ namespace incom::error {}
     struct std::is_error_code_enum<TYPE> : public true_type {};                                                        \
                                                                                                                        \
     namespace NAMESPACE_FULL {                                                                                         \
-    std::error_code make_error_code(TYPE e) {                                                                          \
+    inline std::error_code make_error_code(TYPE e) {                                                                   \
         return std::error_code(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());           \
     }                                                                                                                  \
                                                                                                                        \
-    std::error_condition make_error_condition(TYPE e) {                                                                \
+    inline std::error_condition make_error_condition(TYPE e) {                                                         \
         return std::error_condition(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());      \
     }                                                                                                                  \
     }
