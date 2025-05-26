@@ -12,6 +12,10 @@ namespace error {
 namespace detail {
 
 template <typename T>
+requires requires(T t) {
+    { make_error_code(t) } -> std::same_as<std::error_code>;
+    { make_error_condition(t) } -> std::same_as<std::error_condition>;
+}
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
@@ -36,17 +40,6 @@ public:
         return instance;
     }
 };
-
-// IF THIS GETS INSTANTIATED ONE GETS A COMPILE TIME ERROR ON PURPOSE
-template <typename E>
-requires std::is_scoped_enum_v<E>
-inline std::string_view incerr_msg_dispatch(E &&e) {
-    static_assert(false, "Unhandled message dispatch for some error type (ie scoped enum type used for errors). Please "
-                         "provide a free function with the signature 'inline const std::string_view err_msg_dispatch(E "
-                         "&&e)' in the same namespace as the scoped enum definition where "
-                         "'E' is the scoped enum type");
-    std::unreachable();
-}
 } // namespace detail
 
 class incerr_code : public std::error_code {
