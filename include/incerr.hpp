@@ -93,7 +93,7 @@ public:
     template <typename E>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
              detail::enum_isRegistered<E>
-    static inline const incerr_code make(E e) {
+    static incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
@@ -102,7 +102,7 @@ public:
     template <typename E, typename S>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
              detail::enum_isRegistered<E> && std::is_convertible_v<S, std::string_view>
-    static inline const incerr_code make(E e, S const &&customMessage) {
+    static incerr_code make(E e, S const &&customMessage) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(),
                            std::forward<decltype(customMessage)>(customMessage));
     }
