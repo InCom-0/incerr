@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <type_traits>
@@ -72,19 +73,20 @@ public:
 
 class incerr_code : public std::error_code {
 public:
-    const std::string localMsg;
-
     template <typename E>
     requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     static inline const incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
+    // One can provide 'custom message' which is stored in the static storage of the class
+    // This way the message does not get passed around and the 'incerr_code' instances are kept tiny
     template <typename E, typename S>
     requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E> &&
              std::is_convertible_v<S, std::string_view>
-    static inline const incerr_code make(E e, S const sv) {
-        return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
+    static inline const incerr_code make(E e, S const &&customMessage) {
+        return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(),
+                           std::forward<decltype(customMessage)>(customMessage));
     }
 
     template <typename E>
@@ -94,6 +96,11 @@ public:
     }
 
 private:
+    // TODO: This is not all that nice as it may just grow to infinity
+    // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
+    static inline std::vector<std::string> localMsgs{""};
+    size_t                                 msgCursor;
+
     incerr_code() = delete;
     template <typename E>
     requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
@@ -101,9 +108,14 @@ private:
         *this = make(__e);
     }
 
-    incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), localMsg() {}
-    incerr_code(int ec, const std::error_category &cat, std::string_view const localMsg) noexcept
-        : std::error_code(ec, cat), localMsg(localMsg) {}
+    incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), msgCursor{0uz} {}
+
+    template <typename SV>
+    requires std::is_convertible_v<SV, std::string_view>
+    incerr_code(int ec, const std::error_category &cat, SV const &&sv) noexcept
+        : std::error_code(ec, cat), msgCursor(localMsgs.size()) {
+        localMsgs.push_back(std::string{sv});
+    }
 };
 } // namespace error
 } // namespace incom
@@ -116,7 +128,7 @@ private:
     template <>                                                                                                        \
     struct std::is_error_code_enum<TYPE_FULLY_QUALIFIED> : public true_type {};                                        \
                                                                                                                        \
-    namespace NAMESPACE_FULLY_QUALIFIED {                                                                                         \
+    namespace NAMESPACE_FULLY_QUALIFIED {                                                                              \
     inline std::error_code make_error_code(TYPE_FULLY_QUALIFIED e) {                                                   \
         return std::error_code(static_cast<int>(e),                                                                    \
                                incom::error::detail::incerr_cat<TYPE_FULLY_QUALIFIED>::getSingleton());                \
@@ -128,4 +140,9 @@ private:
     }                                                                                                                  \
     }
 
+#ifndef INCOM_INCERR_NAMESPACE_ALIAS
+#define INCOM_INCERR_NAMESPACE_ALIAS
+
 namespace incerr = incom::error;
+
+#endif
