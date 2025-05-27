@@ -23,7 +23,6 @@ target_sources(incerr
         FILE_SET pub_headers
         TYPE HEADERS
         BASE_DIRS
-                include/)
-
+                include/incerr/)
                 
 target_compile_features(incerr INTERFACE cxx_std_23)
