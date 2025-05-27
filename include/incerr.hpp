@@ -46,7 +46,7 @@ private:
 
     template <typename EE = E>
     std::string __internal_name_dispatch() const {
-        return magic_enum::enum_type_name<EE>();
+        return std::string{magic_enum::enum_type_name<EE>()};
     }
 
     template <typename EE = E>
@@ -57,7 +57,7 @@ private:
 
     template <typename EE = E>
     std::string __internal_msg_dispatch(const int ev) const {
-        return magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value());
+        return std::string{magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value())};
     }
 
 public:
