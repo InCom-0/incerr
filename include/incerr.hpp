@@ -26,7 +26,7 @@ concept enum_hasNameDispatch = requires(T t) {
 };
 
 template <typename E>
-requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
+requires std::is_scoped_enum_v<E>
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
@@ -75,19 +75,20 @@ public:
     const std::string localMsg;
 
     template <typename E>
-    requires std::is_scoped_enum_v<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     static inline const incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E, typename S>
-    requires std::is_scoped_enum_v<E> && std::is_convertible_v<S, std::string_view>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E> &&
+             std::is_convertible_v<S, std::string_view>
     static inline const incerr_code make(E e, S const sv) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
     }
 
     template <typename E>
-    requires std::is_scoped_enum_v<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     static inline const std::error_code make_std_ec(E e) {
         return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
@@ -95,7 +96,7 @@ public:
 private:
     incerr_code() = delete;
     template <typename E>
-    requires std::is_scoped_enum_v<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     incerr_code(E __e) {
         *this = make(__e);
     }
