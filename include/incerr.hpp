@@ -37,7 +37,7 @@ private:
     }
 
     virtual const char *name() const noexcept override {
-        static const std::string s = __internal_name_dispatch();
+        static const std::string s{__internal_name_dispatch()};
         return s.c_str();
     }
     virtual std::string message(int ev) const override { return std::string(__internal_msg_dispatch(ev)); }
@@ -60,7 +60,7 @@ private:
     std::string_view __internal_msg_dispatch(const int ev) const {
         return incerr_msg_dispatch(T{ev});
     }
-    
+
     template <typename TT = T>
     std::string_view __internal_msg_dispatch(const int ev) const {
         return std::string_view("NO DISPATCH");
