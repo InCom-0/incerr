@@ -40,24 +40,24 @@ private:
     template <typename EE = E>
     requires enum_hasNameDispatch<EE>
     std::string __internal_name_dispatch() const {
-        static constexpr const E instance{};
+        static constexpr const EE instance{};
         return incerr_name_dispatch(instance);
     }
 
     template <typename EE = E>
     std::string __internal_name_dispatch() const {
-        return magic_enum::enum_type_name<E>();
+        return magic_enum::enum_type_name<EE>();
     }
 
     template <typename EE = E>
     requires enum_hasMsgDispatch<EE>
     std::string __internal_msg_dispatch(const int ev) const {
-        return std::string{incerr_msg_dispatch(E{ev})};
+        return std::string{incerr_msg_dispatch(EE{ev})};
     }
 
     template <typename EE = E>
     std::string __internal_msg_dispatch(const int ev) const {
-        return magic_enum::enum_name<E>(magic_enum::enum_cast<E>(ev));
+        return magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value());
     }
 
 public:
