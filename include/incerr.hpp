@@ -37,12 +37,12 @@ private:
     }
     virtual std::string message(int ev) const override { return __internal_msg_dispatch(ev); }
 
-    template <typename EE = E>
-    requires enum_hasNameDispatch<EE>
-    std::string __internal_name_dispatch() const {
-        static constexpr const EE instance{};
-        return incerr_name_dispatch(instance);
-    }
+    // template <typename EE = E>
+    // requires enum_hasNameDispatch<EE>
+    // std::string __internal_name_dispatch() const {
+    //     static constexpr const EE instance{};
+    //     return std::string{incerr_name_dispatch(instance)};
+    // }
 
     template <typename EE = E>
     std::string __internal_name_dispatch() const {
@@ -108,24 +108,23 @@ private:
 } // namespace error
 } // namespace incom
 
-
-namespace incom::error {}
-
 // The user MUST 'register' the enum types used in the library. Constraints violation on incerr_code static methods will
 // ensue during compilation otherwise.
 // Either do this by using this macro (which can be 'undefed' once not needed ...
 // typically at the end of the file with the enums definitions). Or just do the thing the macro does manually
-#define INCERR_REGISTER(TYPE, NAMESPACE_FULL)                                                                          \
+#define INCERR_REGISTER(TYPE_FULLY_QUALIFIED, NAMESPACE_FULLY_QUALIFIED)                                               \
     template <>                                                                                                        \
-    struct std::is_error_code_enum<TYPE> : public true_type {};                                                        \
+    struct std::is_error_code_enum<TYPE_FULLY_QUALIFIED> : public true_type {};                                        \
                                                                                                                        \
-    namespace NAMESPACE_FULL {                                                                                         \
-    inline std::error_code make_error_code(TYPE e) {                                                                   \
-        return std::error_code(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());           \
+    namespace NAMESPACE_FULLY_QUALIFIED {                                                                                         \
+    inline std::error_code make_error_code(TYPE_FULLY_QUALIFIED e) {                                                   \
+        return std::error_code(static_cast<int>(e),                                                                    \
+                               incom::error::detail::incerr_cat<TYPE_FULLY_QUALIFIED>::getSingleton());                \
     }                                                                                                                  \
                                                                                                                        \
-    inline std::error_condition make_error_condition(TYPE e) {                                                         \
-        return std::error_condition(static_cast<int>(e), incom::error::detail::incerr_cat<TYPE>::getSingleton());      \
+    inline std::error_condition make_error_condition(TYPE_FULLY_QUALIFIED e) {                                         \
+        return std::error_condition(static_cast<int>(e),                                                               \
+                                    incom::error::detail::incerr_cat<TYPE_FULLY_QUALIFIED>::getSingleton());           \
     }                                                                                                                  \
     }
 
