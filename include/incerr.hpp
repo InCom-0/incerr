@@ -21,7 +21,6 @@ concept enumHasMsgDispatch = requires(T t) {
 };
 
 template <typename T>
-requires enumHasMsgDispatch<T>
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
@@ -37,7 +36,18 @@ private:
         static const std::string s = __typeToString<T>();
         return s.c_str();
     }
-    virtual std::string message(int ev) const override { return std::string(incerr_msg_dispatch(T{ev})); }
+    virtual std::string message(int ev) const override { return std::string(__internal_msg_dispatch(ev)); }
+
+    template <typename TT = T>
+    requires enumHasMsgDispatch<TT>
+    std::string_view __internal_msg_dispatch(const int ev) {
+        return incerr_msg_dispatch(T{ev});
+    }
+
+    template <typename TT = T>
+    std::string_view __internal_msg_dispatch(const int ev) {
+        return std::string_view("NO DISPATCH");
+    }
 
 public:
     // Meyers' Singleton technique to guarantee only 1 instance is ever created
@@ -46,6 +56,7 @@ public:
         return instance;
     }
 };
+
 } // namespace detail
 
 class incerr_code : public std::error_code {
