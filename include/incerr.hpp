@@ -101,9 +101,8 @@ public:
 private:
     // TODO: This is not all that nice as it may just grow to infinity
     // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
-    const std::unique_ptr<std::string> customMessage;
-
-    incerr_code()                       = delete;
+    std::unique_ptr<std::string> customMessage;
+    incerr_code() = delete;
 
     template <typename E>
     requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
