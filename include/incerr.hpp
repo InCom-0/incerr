@@ -33,6 +33,10 @@ struct enum_hasNoZeroValue {
     static const bool value = (not magic_enum::enum_cast<ENUM_T>(VAL).has_value());
 };
 
+// The scoped enums used as template arguments in incerr library MUST NOT use the constant '0' as one of the
+// explicitly named contants (so called 'enumerators')
+// The fix would typically be to define the first enumerator as having constant value '1'
+// This small limitation ensures better compatibility with the standard library
 template <typename ENUM_T>
 concept enum_hasNoZeroValue_v = enum_hasNoZeroValue<ENUM_T, 0>::value;
 
@@ -82,6 +86,7 @@ public:
 
 class incerr_code : public std::error_code {
 public:
+    // MAIN INTERFACE METHODS
     template <typename E>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
              detail::enum_isRegistered<E>
@@ -108,12 +113,26 @@ public:
 
     const std::string_view get_customMessage() const { return std::string_view{*customMessage}; }
 
+    // CONSTRUCTION
+    incerr_code(incerr_code &&src) = default;                                  // move constructor
+    incerr_code(const incerr_code &src)
+        : customMessage(std::make_unique<std::string>(*src.customMessage)) {}; // copy constructor
+    incerr_code &operator=(const incerr_code &src)                             // copy assignment
+    {
+        return *this = incerr_code(src);
+    }
+
+    incerr_code &operator=(incerr_code &&src) noexcept // move assignment
+    {
+        std::swap(customMessage, src.customMessage);
+        return *this;
+    }
+
 private:
-    // TODO: This is not all that nice as it may just grow to infinity
-    // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
     std::unique_ptr<std::string> customMessage;
-    incerr_code() = delete;
-    incerr_code(const incerr_code &src) : customMessage(std::make_unique<std::string>(*src.customMessage)) {};
+
+    incerr_code()  = delete;
+    ~incerr_code() = default;
 
     template <typename E>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
