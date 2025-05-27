@@ -52,7 +52,7 @@ private:
     template <typename EE = E>
     requires enum_hasMsgDispatch<EE>
     std::string __internal_msg_dispatch(const int ev) const {
-        return incerr_msg_dispatch(E{ev});
+        return std::string{incerr_msg_dispatch(E{ev})};
     }
 
     template <typename EE = E>
