@@ -77,7 +77,7 @@ private:
 
 public:
     // Meyers' Singleton technique to guarantee only 1 instance is ever created
-    static const std::error_category &getSingleton() {
+    static const incerr_cat<E> &getSingleton() {
         static const incerr_cat<E> instance;
         return instance;
     }
@@ -117,7 +117,7 @@ public:
     const std::string_view get_customMessage() const { return std::string_view{*customMessage}; }
 
     // CONSTRUCTION
-    incerr_code() = delete;
+    incerr_code()                  = delete;
     incerr_code(incerr_code &&src) = default; // move constructor
 
     // copy constructor
