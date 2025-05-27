@@ -40,12 +40,12 @@ private:
 
     template <typename TT = T>
     requires enumHasMsgDispatch<TT>
-    std::string_view __internal_msg_dispatch(const int ev) {
+    std::string_view __internal_msg_dispatch(const int ev) const {
         return incerr_msg_dispatch(T{ev});
     }
 
     template <typename TT = T>
-    std::string_view __internal_msg_dispatch(const int ev) {
+    std::string_view __internal_msg_dispatch(const int ev) const {
         return std::string_view("NO DISPATCH");
     }
 
