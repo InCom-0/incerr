@@ -103,7 +103,10 @@ private:
     // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
     const std::unique_ptr<std::string> customMessage;
 
-    incerr_code() = delete;
+    incerr_code()                       = delete;
+    incerr_code(incerr_code &&src)      = delete;
+    incerr_code(const incerr_code &src) = delete;
+
     template <typename E>
     requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     incerr_code(E __e) {
