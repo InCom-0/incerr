@@ -95,6 +95,8 @@ public:
         return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
+    const std::string_view get_customMessage() { return std::string_view(localMsgs.at(msgCursor)); }
+
 private:
     // TODO: This is not all that nice as it may just grow to infinity
     // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
