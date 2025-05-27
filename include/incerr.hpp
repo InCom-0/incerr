@@ -19,6 +19,10 @@ template <typename T>
 concept enumHasMsgDispatch = requires(T t) {
     { incerr_msg_dispatch(std::move(t)) } -> std::same_as<std::string_view>;
 };
+template <typename T>
+concept enumHasNameDispatch = requires(T t) {
+    { incerr_name_dispatch(std::move(t)) } -> std::same_as<std::string_view>;
+};
 
 template <typename T>
 class incerr_cat : public std::error_category {
@@ -33,17 +37,30 @@ private:
     }
 
     virtual const char *name() const noexcept override {
-        static const std::string s = __typeToString<T>();
+        static const std::string s = __internal_name_dispatch();
         return s.c_str();
     }
     virtual std::string message(int ev) const override { return std::string(__internal_msg_dispatch(ev)); }
+
+    template <typename TT = T>
+    requires enumHasNameDispatch<TT>
+    std::string_view __internal_name_dispatch() const {
+        static constexpr const T instance{};
+        return incerr_name_dispatch(instance);
+    }
+
+    template <typename TT = T>
+    std::string_view __internal_name_dispatch() const {
+        return __typeToString<T>();
+    }
+
 
     template <typename TT = T>
     requires enumHasMsgDispatch<TT>
     std::string_view __internal_msg_dispatch(const int ev) const {
         return incerr_msg_dispatch(T{ev});
     }
-
+    
     template <typename TT = T>
     std::string_view __internal_msg_dispatch(const int ev) const {
         return std::string_view("NO DISPATCH");
