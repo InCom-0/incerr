@@ -85,6 +85,9 @@ public:
 } // namespace detail
 
 class incerr_code : public std::error_code {
+private:
+    std::unique_ptr<std::string> customMessage;
+
 public:
     // MAIN INTERFACE METHODS
     template <typename E>
@@ -114,26 +117,24 @@ public:
     const std::string_view get_customMessage() const { return std::string_view{*customMessage}; }
 
     // CONSTRUCTION
-    incerr_code(incerr_code &&src) = default;                                  // move constructor
-    incerr_code(const incerr_code &src)
-        : customMessage(std::make_unique<std::string>(*src.customMessage)) {}; // copy constructor
-    incerr_code &operator=(const incerr_code &src)                             // copy assignment
-    {
-        return *this = incerr_code(src);
-    }
+    incerr_code() = delete;
+    incerr_code(incerr_code &&src) = default; // move constructor
 
-    incerr_code &operator=(incerr_code &&src) noexcept // move assignment
-    {
+    // copy constructor
+    incerr_code(const incerr_code &src) : customMessage(std::make_unique<std::string>(*src.customMessage)) {};
+    // copy assignment
+    incerr_code &operator=(const incerr_code &src) { return *this = incerr_code(src); }
+
+    // move assignment
+    incerr_code &operator=(incerr_code &&src) noexcept {
         std::swap(customMessage, src.customMessage);
         return *this;
     }
 
-private:
-    std::unique_ptr<std::string> customMessage;
-
-    incerr_code()  = delete;
+    // DESTRUCTION
     ~incerr_code() = default;
 
+private:
     template <typename E>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
              detail::enum_isRegistered<E>
