@@ -1,75 +1,69 @@
 #pragma once
 
-#include <source_location>
 #include <string_view>
 #include <system_error>
 #include <type_traits>
 #include <utility>
+
+#include <magic_enum/magic_enum.hpp>
 
 
 namespace incom {
 namespace error {
 namespace detail {
 template <typename T>
-concept enumIsRegistered = requires(T t) {
+concept enum_isRegistered = requires(T t) {
     { make_error_code(t) } -> std::same_as<std::error_code>;
     { make_error_condition(t) } -> std::same_as<std::error_condition>;
 };
 template <typename T>
-concept enumHasMsgDispatch = requires(T t) {
+concept enum_hasMsgDispatch = requires(T t) {
     { incerr_msg_dispatch(std::move(t)) } -> std::same_as<std::string_view>;
 };
 template <typename T>
-concept enumHasNameDispatch = requires(T t) {
+concept enum_hasNameDispatch = requires(T t) {
     { incerr_name_dispatch(std::move(t)) } -> std::same_as<std::string_view>;
 };
 
-template <typename T>
+template <typename E>
+requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
-
-    template <typename TT>
-    constexpr auto __typeToString() const {
-        auto EmbeddingSignature = std::string{std::source_location::current().function_name()};
-        auto firstPos           = EmbeddingSignature.rfind("::") + 2;
-        return EmbeddingSignature.substr(firstPos, EmbeddingSignature.size() - firstPos - 1);
-    }
 
     virtual const char *name() const noexcept override {
         static const std::string s{__internal_name_dispatch()};
         return s.c_str();
     }
-    virtual std::string message(int ev) const override { return std::string(__internal_msg_dispatch(ev)); }
+    virtual std::string message(int ev) const override { return __internal_msg_dispatch(ev); }
 
-    template <typename TT = T>
-    requires enumHasNameDispatch<TT>
-    std::string_view __internal_name_dispatch() const {
-        static constexpr const T instance{};
+    template <typename EE = E>
+    requires enum_hasNameDispatch<EE>
+    std::string __internal_name_dispatch() const {
+        static constexpr const E instance{};
         return incerr_name_dispatch(instance);
     }
 
-    template <typename TT = T>
-    std::string_view __internal_name_dispatch() const {
-        return __typeToString<T>();
+    template <typename EE = E>
+    std::string __internal_name_dispatch() const {
+        return magic_enum::enum_type_name<E>();
     }
 
-
-    template <typename TT = T>
-    requires enumHasMsgDispatch<TT>
-    std::string_view __internal_msg_dispatch(const int ev) const {
-        return incerr_msg_dispatch(T{ev});
+    template <typename EE = E>
+    requires enum_hasMsgDispatch<EE>
+    std::string __internal_msg_dispatch(const int ev) const {
+        return incerr_msg_dispatch(E{ev});
     }
 
-    template <typename TT = T>
-    std::string_view __internal_msg_dispatch(const int ev) const {
-        return std::string_view("NO DISPATCH");
+    template <typename EE = E>
+    std::string __internal_msg_dispatch(const int ev) const {
+        return magic_enum::enum_name<E>(magic_enum::enum_cast<E>(ev));
     }
 
 public:
     // Meyers' Singleton technique to guarantee only 1 instance is ever created
     static const std::error_category &getSingleton() {
-        static const incerr_cat<T> instance;
+        static const incerr_cat<E> instance;
         return instance;
     }
 };
@@ -81,20 +75,19 @@ public:
     const std::string localMsg;
 
     template <typename E>
-    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enumIsRegistered<E>
+    requires std::is_scoped_enum_v<E>
     static inline const incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E, typename S>
-    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enumIsRegistered<E> &&
-             std::is_convertible_v<S, std::string_view>
+    requires std::is_scoped_enum_v<E> && std::is_convertible_v<S, std::string_view>
     static inline const incerr_code make(E e, S const sv) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(), sv);
     }
 
     template <typename E>
-    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enumIsRegistered<E>
+    requires std::is_scoped_enum_v<E>
     static inline const std::error_code make_std_ec(E e) {
         return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
@@ -102,7 +95,7 @@ public:
 private:
     incerr_code() = delete;
     template <typename E>
-    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enumIsRegistered<E>
+    requires std::is_scoped_enum_v<E>
     incerr_code(E __e) {
         *this = make(__e);
     }
