@@ -107,6 +107,9 @@ public:
                            std::forward<decltype(customMessage)>(customMessage));
     }
 
+    // If one prefers to use the 'std::error_code' type directly and not the extended type 'incerr_code'
+    // By doing so one gets all the benefits of this library except the possibility to create
+    // 'customMessage' at the call site (and later show it)
     template <typename E>
     requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
              detail::enum_isRegistered<E>
