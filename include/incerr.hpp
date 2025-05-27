@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -96,12 +97,15 @@ public:
     }
 
     const std::string_view get_customMessage() const { return std::string_view(localMsgs.at(msgCursor)); }
+    const std::string_view get_customMessage_fromPTR() const { return std::string_view{*customMessage}; }
 
 private:
     // TODO: This is not all that nice as it may just grow to infinity
     // TODO: Might figure out some way to 'free up' old ones ... lifetime issues are such pain ... :-)
     static inline std::vector<std::string> localMsgs{""};
     size_t                                 msgCursor;
+
+    const std::shared_ptr<std::string> customMessage;
 
     incerr_code() = delete;
     template <typename E>
@@ -110,12 +114,13 @@ private:
         *this = make(__e);
     }
 
-    incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), msgCursor{0uz} {}
+    incerr_code(int ec, const std::error_category &cat) noexcept
+        : std::error_code(ec, cat), msgCursor{0uz}, customMessage{new std::string{""}} {}
 
     template <typename SV>
     requires std::is_convertible_v<SV, std::string_view>
     incerr_code(int ec, const std::error_category &cat, SV const &&sv) noexcept
-        : std::error_code(ec, cat), msgCursor(localMsgs.size()) {
+        : std::error_code(ec, cat), msgCursor(localMsgs.size()), customMessage{new std::string{sv}} {
         localMsgs.push_back(std::string{sv});
     }
 };
