@@ -104,7 +104,6 @@ private:
     const std::unique_ptr<std::string> customMessage;
 
     incerr_code()                       = delete;
-    incerr_code(incerr_code &&src)      = delete;
     incerr_code(const incerr_code &src) = delete;
 
     template <typename E>
