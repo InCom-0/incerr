@@ -121,19 +121,19 @@ public:
     incerr_code()                  = delete;
     incerr_code(incerr_code &&src) = default; // move constructor
 
-    // // copy constructor
-    // incerr_code(const incerr_code &src) : customMessage(std::make_unique<std::string>(*src.customMessage)) {};
-    // // copy assignment
-    // incerr_code &operator=(const incerr_code &src) { return *this = incerr_code(src); }
+    // copy constructor
+    incerr_code(const incerr_code &src) : customMessage{src.customMessage} {};
+    // copy assignment
+    incerr_code &operator=(const incerr_code &src) { return *this = incerr_code(src); }
 
-    // // move assignment
-    // incerr_code &operator=(incerr_code &&src) noexcept {
-    //     std::swap(customMessage, src.customMessage);
-    //     return *this;
-    // }
+    // move assignment
+    incerr_code &operator=(incerr_code &&src) noexcept {
+        std::swap(customMessage, src.customMessage);
+        return *this;
+    }
 
-    // // DESTRUCTION
-    // ~incerr_code() = default;
+    // DESTRUCTION
+    ~incerr_code() = default;
 
 private:
     template <typename E>
@@ -143,8 +143,7 @@ private:
         *this = make(__e);
     }
 
-    incerr_code(int ec, const std::error_category &cat) noexcept
-        : std::error_code(ec, cat), customMessage{""} {}
+    incerr_code(int ec, const std::error_category &cat) noexcept : std::error_code(ec, cat), customMessage{""} {}
 
     template <typename SV>
     requires std::is_convertible_v<SV, std::string_view>

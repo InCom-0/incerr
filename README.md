@@ -7,7 +7,6 @@ In short the library provides a very ergonomic way to customize/extend std::erro
 While (almost) all of the things the library does can be done just with <system_error>, the practice of doing so is perhaps less ergonomic and straightforward than one would ideally like for the (arguably) rather basic programming concepts such as error codes and error messages. This library makes it as simple as possible.
 
 * Only requires 1 additional line of code per error enum class type for setting things up
-* 
 * The interface of the library as well as the internals are properly contrained using C++20 concepts making it harder to misuse
 * Forbids the user from using unscoped enums for errors (and from doing some other undesirable things)
 * Provides sensible default for getting 'message' (enum value enumerator name) through compile time reflection through [magic_enum] (<https://github.com/Neargye/magic_enum>) header-only library
