@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -14,6 +13,9 @@ namespace incom {
 namespace error {
 
 namespace detail {
+
+// The user MUST 'register' the enum types used in the library by running INCERR_REGISTER(TYPE_FULLY_QUALIFIED,
+// NAMESPACE_FULLY_QUALIFIED) macro (defined at the of incerr.hpp)
 template <typename T>
 concept enum_isRegistered = requires(T t) {
     { make_error_code(t) } -> std::same_as<std::error_code>;
@@ -175,7 +177,5 @@ private:
 
 #ifndef INCOM_INCERR_NAMESPACE_ALIAS
 #define INCOM_INCERR_NAMESPACE_ALIAS
-
 namespace incerr = incom::error;
-
 #endif
