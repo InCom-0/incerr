@@ -4,6 +4,8 @@ In short the library provides a very ergonomic way to customize/extend std::erro
 
 ## Reasons for the library's existence ##
 
+It is extremely handy to have non-templated (ie. 'type erased') type for errors in std::expected (and possibly elsewhere), that can nevertheless hold multiple 'error categories'.
+
 While (almost) all of the things the library does can be done just with <system_error>, the practice of doing so is perhaps less ergonomic and straightforward than one would ideally like for the (arguably) rather basic programming concepts such as error codes and error messages. This library makes it as simple as possible.
 
 * Only requires 1 additional line of code per error enum class type for setting things up
