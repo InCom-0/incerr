@@ -31,7 +31,7 @@ concept enum_hasNameDispatch = requires(T t) {
 };
 
 template <typename ENUM_T, int VAL>
-struct enum_hasNoZeroValue {
+struct enum_hasNoValX {
     static const bool value = (not magic_enum::enum_cast<ENUM_T>(VAL).has_value());
 };
 
@@ -40,7 +40,7 @@ struct enum_hasNoZeroValue {
 // The fix would typically be to define the first enumerator as having constant value '1'
 // This small limitation ensures better compatibility with the standard library
 template <typename ENUM_T>
-concept enum_hasNoZeroValue_v = enum_hasNoZeroValue<ENUM_T, 0>::value;
+concept enum_hasNoZeroValue_v = enum_hasNoValX<ENUM_T, 0>::value;
 
 template <typename E>
 requires std::is_scoped_enum_v<E> && enum_hasNoZeroValue_v<E>
@@ -157,8 +157,11 @@ private:
 
 // The user MUST 'register' the enum types used in the library. Constraints violation on incerr_code static methods will
 // ensue during compilation otherwise.
-// Either do this by using this macro (which can be 'undefed' once not needed ...
-// typically at the end of the file with the enums definitions). Or just do the thing the macro does manually
+// This MACRO needs to be called from global namespace, but it only inserts specialization of is_error_code_enum into
+// std namespace and two free function definitions into the same namespace as the ENUM type.
+// Either do this by using this macro (which can be 'undefed' once not needed ... typically at the end of the file with
+// the enums definitions). Or just do the thing the macro does manually
+// Note: The author is not aware of a good way to (easily) do this without a MACRO
 #define INCERR_REGISTER(TYPE_FULLY_QUALIFIED, NAMESPACE_FULLY_QUALIFIED)                                               \
     template <>                                                                                                        \
     struct std::is_error_code_enum<TYPE_FULLY_QUALIFIED> : public true_type {};                                        \
