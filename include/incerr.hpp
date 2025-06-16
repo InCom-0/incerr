@@ -124,7 +124,7 @@ public:
     incerr_code(incerr_code &&src) = default; // move constructor
 
     // copy constructor
-    incerr_code(const incerr_code &src) : customMessage{src.customMessage} {};
+    incerr_code(const incerr_code &src) = default;
     // copy assignment
     incerr_code &operator=(const incerr_code &src) { return *this = incerr_code(src); }
 
