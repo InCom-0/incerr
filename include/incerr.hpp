@@ -69,12 +69,14 @@ private:
     template <typename EE = E>
     requires enum_hasMsgDispatch<EE>
     std::string __internal_msg_dispatch(const int ev) const {
-        return std::string{incerr_msg_dispatch(EE{ev})};
+        return std::string(magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value()))
+            .append("\n")
+            .append(incerr_msg_dispatch(EE{ev}));
     }
 
     template <typename EE = E>
     std::string __internal_msg_dispatch(const int ev) const {
-        return std::string{magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value())};
+        return std::string(magic_enum::enum_name<EE>(magic_enum::enum_cast<EE>(ev).value()));
     }
 
 public:
