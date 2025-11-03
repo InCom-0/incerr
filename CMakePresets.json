@@ -2,69 +2,102 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "MSYS2 UCRT gcc DBG",
+            "name": "MSYS2_ucrt_gcc_Debug",
             "hidden": false,
             "inherits": [
-                "gcc_DBG",
-                "InComs"
+                "_common",
+                "_gcc",
+                "_debug",
+                "MSYS_ucrt_PATH"
+            ],
+            "vendor": {
+                "visualStudio": {
+                    "cmake.debugConfig": {
+                        "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe"
+                    }
+                }
+            }
+        },
+        {
+            "name": "MSYS2_ucrt_gcc_Release",
+            "hidden": false,
+            "inherits": [
+                "_common",
+                "_gcc",
+                "_release",
+                "MSYS_ucrt_PATH"
+            ],
+            "vendor": {
+                "visualStudio": {
+                    "cmake.debugConfig": {
+                        "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe"
+                    }
+                }
+            }
+        },
+        {
+            "name": "MSVC_Debug",
+            "hidden": false,
+            "inherits": [
+                "_common",
+                "_MSVC",
+                "_debug"
             ]
         },
         {
-            "name": "MSYS2 UCRT gcc REL",
+            "name": "MSVC_Release",
             "hidden": false,
             "inherits": [
-                "gcc_REL",
-                "InComs",
-                "MSYS2_portable_library_linking"
+                "_common",
+                "_MSVC",
+                "_release"
             ]
         },
         {
-            "name": "gcc_DBG",
-            "displayName": "gcc DBG",
+            "name": "MSVC_Release_TRACY",
             "hidden": false,
             "inherits": [
-                "_common",
-                "_gcc"
+                "MSVC_Release"
             ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_CXX_FLAGS": "-DTRACY_ENABLE -DTRACY_NO_EXIT"
             }
         },
         {
-            "name": "gcc_REL",
-            "displayName": "gcc REL",
+            "name": "gcc_Debug",
             "hidden": false,
             "inherits": [
                 "_common",
-                "_gcc"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+                "_gcc",
+                "_debug"
+            ]
         },
         {
-            "name": "clang_DBG",
-            "displayName": "clang DBG",
+            "name": "gcc_Release",
             "hidden": false,
             "inherits": [
                 "_common",
-                "_clang"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+                "_gcc",
+                "_release"
+            ]
         },
         {
-            "name": "clang_REL",
-            "displayName": "clang REL",
+            "name": "clang_Debug",
             "hidden": false,
             "inherits": [
                 "_common",
-                "_clang"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+                "_clang",
+                "_debug"
+            ]
+        },
+        {
+            "name": "clang_Release",
+            "hidden": false,
+            "inherits": [
+                "_common",
+                "_clang",
+                "_release"
+            ]
         },
         {
             "name": "_common",
@@ -72,7 +105,22 @@
             "binaryDir": "${sourceDir}/build/",
             "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": true
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+                "CPM_SOURCE_CACHE": "../.cache/CPM"
+            }
+        },
+        {
+            "name": "_release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "_debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -93,17 +141,15 @@
             }
         },
         {
-            "name": "InComs",
+            "name": "_MSVC",
+            "hidden": true,
+            "toolchainFile": "cmake/toolchain/Windows.MSVC.toolchain.cmake"
+        },
+        {
+            "name": "MSYS_ucrt_PATH",
             "hidden": true,
             "environment": {
                 "PATH": "C:/msys64/ucrt64/bin;$penv{PATH}"
-            }
-        },
-        {
-            "name": "MSYS2_portable_library_linking",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_EXE_LINKER_FLAGS": "-static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,-Bdynamic,--no-whole-archive"
             }
         }
     ]

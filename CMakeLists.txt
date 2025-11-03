@@ -1,17 +1,10 @@
 cmake_minimum_required(VERSION 3.30...4.0)
 
 project(incerr)
-set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
-include(FetchContent)
-
-FetchContent_Declare(
-    magic_enum
-    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
-    GIT_TAG v0.9.7
-)
-FetchContent_MakeAvailable(magic_enum)
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:Neargye/magic_enum@0.9.7")
 
 
 add_library(incerr INTERFACE)
