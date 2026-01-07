@@ -13,9 +13,9 @@ target_link_libraries(incerr INTERFACE magic_enum::magic_enum)
 
 target_sources(incerr
     PUBLIC
-        FILE_SET pub_headers
-        TYPE HEADERS
-        BASE_DIRS
-                include)
-                
+    FILE_SET pub_headers
+    TYPE HEADERS
+    BASE_DIRS
+    include)
+
 target_compile_features(incerr INTERFACE cxx_std_23)
