@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INCOM_INCERR_HPP
+#define INCOM_INCERR_HPP
 
 #include <string>
 #include <string_view>
@@ -157,6 +158,16 @@ private:
 } // namespace error
 } // namespace incom
 
+#ifndef INCOM_INCERR_NAMESPACE_ALIAS
+#define INCOM_INCERR_NAMESPACE_ALIAS
+namespace incerr = incom::error;
+#endif
+
+#endif // INCOM_INCERR_HPP
+
+// Macro section intentionally outside include guard.
+// This allows re-including incerr.hpp to restore macro after #undef.
+
 // The user MUST 'register' the enum types used in the library. Constraints violation on incerr_code static methods will
 // ensue during compilation otherwise.
 // This MACRO needs to be called from global namespace, but it only inserts specialization of is_error_code_enum into
@@ -164,6 +175,7 @@ private:
 // Either do this by using this macro (which can be 'undefed' once not needed ... typically at the end of the file with
 // the enums definitions). Or just do the thing the macro does manually
 // Note: The author is not aware of a good way to (easily) do this without a MACRO
+#ifndef INCERR_REGISTER
 #define INCERR_REGISTER(TYPE_FULLY_QUALIFIED, NAMESPACE_FULLY_QUALIFIED)                                               \
     template <>                                                                                                        \
     struct std::is_error_code_enum<TYPE_FULLY_QUALIFIED> : public true_type {};                                        \
@@ -179,8 +191,4 @@ private:
                                     incom::error::detail::incerr_cat<TYPE_FULLY_QUALIFIED>::getSingleton());           \
     }                                                                                                                  \
     }
-
-#ifndef INCOM_INCERR_NAMESPACE_ALIAS
-#define INCOM_INCERR_NAMESPACE_ALIAS
-namespace incerr = incom::error;
 #endif
