@@ -44,7 +44,7 @@ template <typename ENUM_T>
 concept enum_hasNoZeroValue_v = enum_hasNoValX<ENUM_T, 0>::value;
 
 template <typename E>
-requires std::is_scoped_enum_v<E> && enum_hasNoZeroValue_v<E>
+requires std::is_scoped_enum_v<E>
 class incerr_cat : public std::error_category {
 private:
     incerr_cat() = default;
@@ -96,15 +96,14 @@ private:
 public:
     // MAIN INTERFACE METHODS
     template <typename E>
-    requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
-             detail::enum_isRegistered<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     static incerr_code make(E e) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
 
     template <typename E, typename S>
-    requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
-             detail::enum_isRegistered<E> && std::is_convertible_v<S, std::string_view>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E> &&
+             std::is_convertible_v<S, std::string_view>
     static incerr_code make(E e, S const &&customMessage) {
         return incerr_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton(),
                            std::forward<decltype(customMessage)>(customMessage));
@@ -114,8 +113,7 @@ public:
     // By doing so one gets all the benefits of this library except the possibility to create
     // 'customMessage' at the call site (and later show it)
     template <typename E>
-    requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
-             detail::enum_isRegistered<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     static inline const std::error_code make_std_ec(E e) {
         return std::error_code(std::to_underlying(e), error::detail::incerr_cat<E>::getSingleton());
     }
@@ -142,8 +140,7 @@ public:
 
 private:
     template <typename E>
-    requires std::is_scoped_enum_v<E> && detail::enum_hasNoZeroValue_v<E> && std::is_error_code_enum<E>::value &&
-             detail::enum_isRegistered<E>
+    requires std::is_scoped_enum_v<E> && std::is_error_code_enum<E>::value && detail::enum_isRegistered<E>
     incerr_code(E __e) {
         *this = make(__e);
     }
