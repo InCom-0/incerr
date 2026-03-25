@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.30...4.0)
 project(incerr)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
-include(cmake/lefticus/CPM.cmake)
+include(cmake/CPM_0.42.1.cmake)
 CPMAddPackage("gh:Neargye/magic_enum@0.9.7")
 
 
